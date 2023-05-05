@@ -9,7 +9,7 @@ const cors = require("cors");
 app.use(cors());
 app.use(express.json());
 
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.q66zrl2.mongodb.net/?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.fzf5yey.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -19,13 +19,18 @@ const client = new MongoClient(uri, {
 const run = async () => {
   try {
     const db = client.db("jobbox");
+    console.log("database connected");
     const userCollection = db.collection("user");
     const jobCollection = db.collection("job");
 
+    console.log(userCollection);
+
+    // user
     app.post("/user", async (req, res) => {
       const user = req.body;
 
       const result = await userCollection.insertOne(user);
+      console.log(result);
 
       res.send(result);
     });
@@ -42,6 +47,7 @@ const run = async () => {
       res.send({ status: false });
     });
 
+    // job apply
     app.patch("/apply", async (req, res) => {
       const userId = req.body.userId;
       const jobId = req.body.jobId;
@@ -61,6 +67,7 @@ const run = async () => {
       res.send({ status: false });
     });
 
+    // question
     app.patch("/query", async (req, res) => {
       const userId = req.body.userId;
       const jobId = req.body.jobId;
@@ -88,6 +95,7 @@ const run = async () => {
       res.send({ status: false });
     });
 
+    // reply
     app.patch("/reply", async (req, res) => {
       const userId = req.body.userId;
       const reply = req.body.reply;
@@ -117,6 +125,7 @@ const run = async () => {
       res.send({ status: false });
     });
 
+    // applied job email
     app.get("/applied-jobs/:email", async (req, res) => {
       const email = req.params.email;
       const query = { applicants: { $elemMatch: { email: email } } };
@@ -126,6 +135,7 @@ const run = async () => {
       res.send({ status: true, data: result });
     });
 
+    // jobs
     app.get("/jobs", async (req, res) => {
       const cursor = jobCollection.find({});
       const result = await cursor.toArray();
